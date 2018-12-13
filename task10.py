@@ -48,11 +48,9 @@ def part1():
         if abs(init_leftmost.x - init_rightmost.x) < 100:
             print_stars()
             print(i)
-        
         i += 1
 
 def part2():
     print(0)
 
 part1()
-        
