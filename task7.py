@@ -8,6 +8,7 @@ for l in f.read().splitlines():
     constraints.append((l[5],l[36]))
 
 def part1():
+    global constraints
     remaining_tasks = [c for c in string.ascii_uppercase]
     ready_tasks = []
     done_tasks = []
@@ -29,6 +30,11 @@ def part1():
 
     print(''.join(done_tasks))
 
+class Worker:
+    def __init__(self, task, remaining_time):
+        self.task = task
+        self.remaining_time = remaining_time
+
 def update_lists(remaining_tasks, ready_tasks):
     for char in remaining_tasks:
         ready = True
@@ -43,23 +49,28 @@ def update_lists(remaining_tasks, ready_tasks):
     return (remaining_tasks, ready_tasks)
 
 def part2():
-    i = 0 # time steps
+    global constraints
 
     remaining_tasks = [c for c in string.ascii_uppercase]
-    ready_tasks = ['G', 'J'] # hardcoded initally-ready tasks that we know from part1
-    done_tasks = []
-    workers = [] # touple of task and time left, e.g. (F, 23)
+    ready_tasks = ['G', 'J'] # initially-ready tasks that we know from part 1
+    workers = []
 
-    while remaining_tasks or ready_tasks:
+    i = 0 # time steps
+    while constraints or workers:
+        for w in workers:
+            w.remaining_time -= 1
+            if w.remaining_time == 0:
+                constraints = list(filter(lambda co: co[0] != w.task, constraints))
+                remaining_tasks, ready_tasks = update_lists(remaining_tasks, ready_tasks)
+            
+        workers = list(filter(lambda w: w.remaining_time > 0, workers))
+        
+        while len(workers) < 5 and ready_tasks:
+            next_task_to_assign = ready_tasks.pop(0)
+            workers.append(Worker(next_task_to_assign, 60 + ord(next_task_to_assign) - 64))
+
         i += 1
 
-        for w in workers:
-            if w[1] == 0:
-                constraints = list(filter(lambda co: co[0] != w[0], constraints))
-                remaining_tasks,ready_tasks = update_lists(remaining_tasks, ready_tasks)
-                
-            w[1] -= 1 # can get negative, so 0-condition is not true twice for the same task
-
-
+    print(i - 1) # counted one step too much apparently
 
 part2()
