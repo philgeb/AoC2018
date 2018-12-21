@@ -16,36 +16,37 @@ def calc_size_of_longest_alternative():
 
     return max(sub_path_sums)
 
-detour_indicator = ["NS", "SN", "WE", "EW"]
-
-def calc_rooms_path_at_least_1000(last_path_size):
+def calc_rooms_path_at_least_1000(last_path_size, xy_offset):
     global rooms
+    curr_x_off, curr_y_off = xy_offset
     curr = f.read(1)
     curr_path_size = last_path_size
     while curr != ")" and curr != "$":
         if curr == "|":
             curr_path_size = last_path_size
+            curr_x_off, curr_y_off = xy_offset
         elif curr == "(":
-            calc_rooms_path_at_least_1000(curr_path_size)
+            calc_rooms_path_at_least_1000(curr_path_size, (curr_x_off, curr_y_off))
         else:
+            if curr == "N": curr_y_off += 1
+            elif curr == "S": curr_y_off -= 1
+            elif curr == "W": curr_x_off -= 1
+            elif curr == "E": curr_x_off += 1
+
             curr_path_size += 1
-            # strict greater than because number of passed doors = curr_path_size + 1
-            if curr_path_size > 10:
-                rooms += 1
+            curr_pos = (curr_x_off, curr_y_off)
+            if not curr_pos in visited_locations:
+                if curr_path_size >= 1000:
+                    rooms += 1
+                visited_locations.add(curr_pos)
 
-        prev = curr
         curr = f.read(1)
-
-        # ignore the backtracking part of detours
-        if prev + curr in detour_indicator:
-            while(curr != "|"):
-                curr = f.read(1)
 
 def part1():
     print(calc_size_of_longest_alternative())
 
 def part2():
-    calc_rooms_path_at_least_1000(0)
+    calc_rooms_path_at_least_1000(0, (0,0))
     print(rooms)
 
 f = open("input20.txt", "r")
@@ -54,5 +55,6 @@ f = open("input20.txt", "r")
 f.read(1)
 
 rooms = 0
+visited_locations = set()
 
 part2()
